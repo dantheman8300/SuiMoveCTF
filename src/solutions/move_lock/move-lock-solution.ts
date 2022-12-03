@@ -1,4 +1,4 @@
-import { Ed25519Keypair, JsonRpcProvider, RawSigner } from '@mysten/sui.js';
+import { CertifiedTransaction, Ed25519Keypair, JsonRpcProvider, RawSigner, SuiCertifiedTransactionEffects } from '@mysten/sui.js';
 import dotenv from "dotenv";
 
 // Address of the module
@@ -6,6 +6,8 @@ const MODULE_ADDRESS = '0x5793fdbb181ad2e830bcd63a838a52197279fe7f';
 
 // Address/Object id of the ResourceObject
 const RESOURCE_OBJECT_ID = '0x8236c4e99e2ca44bfdf141334a274a91a502cb29';
+
+const GAS_BUDGET = 1000000;
 
 // The encrypted flag found in the module
 // We want to find the plaintext that was used to encrypt this
@@ -146,16 +148,20 @@ async function unlock(key: number[], plaintext: number[]) {
   const keyPair = Ed25519Keypair.deriveKeypair(process.env.RECOVERY_PHRASE || 'hell0')
   const signer = new RawSigner(keyPair, provider);
 
-  // Use this if you need to request SUI from the faucet
-  // await provider.requestSuiFromFaucet(
-  //   await signer.getAddress()
-  // );
+  // Fund the account if needed
+  const balance = await provider.getCoinBalancesOwnedByAddress(
+    await signer.getAddress()
+  );
+  if (balance.length === 0) {
+    console.log('Funding account...');
+    await provider.requestSuiFromFaucet(await signer.getAddress());
+  }
 
   console.log(`Signer address: ${await signer.getAddress()}`);
 
   // Call the get flag function in our solution module
   console.log(`Calling movectf_unlock() in solution module...`);
-  const moveCallTxn = await signer.executeMoveCallWithRequestType({
+  const moveCallTxn = await signer.executeMoveCall({
     packageObjectId: MODULE_ADDRESS,
     module: 'move_lock',
     function: 'movectf_unlock',
@@ -165,9 +171,14 @@ async function unlock(key: number[], plaintext: number[]) {
       key,
       RESOURCE_OBJECT_ID
     ],
-    gasBudget: 10000,
-  });
-  console.log('Unlock transaction:', moveCallTxn);
+    gasBudget: GAS_BUDGET,
+  }) as {
+    EffectsCert: {
+        certificate: CertifiedTransaction;
+        effects: SuiCertifiedTransactionEffects;
+    }
+  };
+  console.log('Unlock transaction:', moveCallTxn.EffectsCert.certificate.transactionDigest);
 
   // Fetch information about the ResourceObject
   const resourceObject = await provider.getObject(RESOURCE_OBJECT_ID);
@@ -182,7 +193,7 @@ async function unlock(key: number[], plaintext: number[]) {
 
   // Use the unlocked resource object to get the flag
   console.log(`Calling get_flag() in solution module...`);
-  const moveCallTxn2 = await signer.executeMoveCallWithRequestType({
+  const moveCallTxn2 = await signer.executeMoveCall({
     packageObjectId: MODULE_ADDRESS,
     module: 'move_lock',
     function: 'get_flag',
@@ -190,9 +201,14 @@ async function unlock(key: number[], plaintext: number[]) {
     arguments: [
       RESOURCE_OBJECT_ID
     ],
-    gasBudget: 10000,
-  });
-  console.log('Get flag transaction:', moveCallTxn2);
+    gasBudget: GAS_BUDGET,
+  }) as {
+    EffectsCert: {
+        certificate: CertifiedTransaction;
+        effects: SuiCertifiedTransactionEffects;
+    }
+  };
+  console.log('Get flag transaction:', moveCallTxn2.EffectsCert.certificate.transactionDigest);
   
   return;
 }

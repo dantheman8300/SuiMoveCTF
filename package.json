@@ -1,0 +1,9 @@
+{
+  "name": "SuiMoveCTF",
+  "version": "1.0.0",
+  "description": "Code base for solutions fo Sui MoveCTF",
+  "main": "index.js",
+  "repository": "https://github.com/dantheman8300/SuiMoveCTF.git",
+  "author": "dantheman8300",
+  "license": "MIT"
+}

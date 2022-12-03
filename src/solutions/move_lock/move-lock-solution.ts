@@ -1,11 +1,14 @@
 import { CertifiedTransaction, Ed25519Keypair, JsonRpcProvider, RawSigner, SuiCertifiedTransactionEffects } from '@mysten/sui.js';
 import dotenv from "dotenv";
+import { exit } from 'process';
 
+
+// Note: Make sure to update the address of the challenge package and the hero object
 // Address of the module
-const MODULE_ADDRESS = '0x5793fdbb181ad2e830bcd63a838a52197279fe7f';
+const MODULE_ADDRESS = '';
 
 // Address/Object id of the ResourceObject
-const RESOURCE_OBJECT_ID = '0x8236c4e99e2ca44bfdf141334a274a91a502cb29';
+const RESOURCE_OBJECT_ID = '';
 
 const GAS_BUDGET = 1000000;
 
@@ -140,12 +143,16 @@ function getPlaintext(key: number[]) {
 async function unlock(key: number[], plaintext: number[]) {
 
   dotenv.config();
+  if (process.env.RECOVERY_PHRASE == undefined) {
+    console.error('RECOVERY_PHRASE not set');
+    exit(1);
+  }
 
   // connect to local RPC server
   const provider = new JsonRpcProvider();
 
   // Create signer instance
-  const keyPair = Ed25519Keypair.deriveKeypair(process.env.RECOVERY_PHRASE || 'hell0')
+  const keyPair = Ed25519Keypair.deriveKeypair(process.env.RECOVERY_PHRASE)
   const signer = new RawSigner(keyPair, provider);
 
   // Fund the account if needed

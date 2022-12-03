@@ -7,23 +7,33 @@ import { exit } from 'process';
 const GAS_BUDGET = 1000000;
 
 // Note: Make sure to update the address of the challenge package and the hero object
-const HERO_ADDRESS = '0x4cfe1379d54f2826a4ce38dad41e938fa5f5e682';
-const MODULE_ADDRESS = '0x498868ec78fcc3b29e3f769e44f1516e895b03f9';
+const HERO_ADDRESS = '';
+const MODULE_ADDRESS = '';
 
-const packagePath = './hero_solution';
+const packagePath = './src/solutions/simple_game/hero_solution';
 
 async function main () {
 
   dotenv.config();
+  if (process.env.RECOVERY_PHRASE == undefined) {
+    console.error('RECOVERY_PHRASE not set');
+    exit(1);
+  }
 
   // connect to local RPC server
   const provider = new JsonRpcProvider();
-  const keyPair = Ed25519Keypair.deriveKeypair(process.env.RECOVERY_PHRASE || 'hell0')
+  const keyPair = Ed25519Keypair.deriveKeypair(process.env.RECOVERY_PHRASE);
   const signer = new RawSigner(keyPair, provider);
-  // // Uncomment the following line to use faucet  
-  // await provider.requestSuiFromFaucet(
-  //   await signer.getAddress()
-  // );
+
+  // Fund the account if needed
+  const balance = await provider.getCoinBalancesOwnedByAddress(
+    await signer.getAddress()
+  );
+  if (balance.length === 0) {
+    console.log('Funding account...');
+    await provider.requestSuiFromFaucet(await signer.getAddress());
+  }
+
   console.log(`Signer address: ${await signer.getAddress()}`)
 
   // Compile and deploy the solution module
@@ -37,7 +47,7 @@ async function main () {
 
   // Publish the package
 
-  const publishTxn = await signer.publishWithRequestType({
+  const publishTxn = await signer.publish({
     compiledModules: compiledModules,
     gasBudget: GAS_BUDGET,
   }) as {
@@ -60,7 +70,7 @@ async function main () {
   console.log(`Solution module address: ${SOLUTION_MODULE_ADDRESS}`);
 
   // Call function to get treasury box from boar king
-  const levelUpTxn = await signer.executeMoveCallWithRequestType({
+  const levelUpTxn = await signer.executeMoveCall({
     packageObjectId: SOLUTION_MODULE_ADDRESS,
     module: 'solution',
     function: 'level_up_hero',
@@ -79,7 +89,7 @@ async function main () {
 
   // Slay the boar king to get the treasury box
   // Call function to get treasury box from boar king
-  const slayKingTxn = await signer.executeMoveCallWithRequestType({
+  const slayKingTxn = await signer.executeMoveCall({
     packageObjectId: SOLUTION_MODULE_ADDRESS,
     module: 'solution',
     function: 'slay_king',
@@ -112,7 +122,7 @@ async function main () {
 
   // get flag using our custom function that exploits the RNG
   console.log('Getting flag...')
-  const flagTxn = await signer.executeMoveCallWithRequestType({
+  const flagTxn = await signer.executeMoveCall({
     packageObjectId: SOLUTION_MODULE_ADDRESS,
     module: 'solution',
     function: 'do_get_flag',

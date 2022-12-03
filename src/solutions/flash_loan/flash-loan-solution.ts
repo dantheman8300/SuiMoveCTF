@@ -3,7 +3,7 @@ import { execSync } from 'child_process';
 import dotenv from "dotenv";
 import { exit } from 'process';
 
-// Change these addresses to match the challenge package address
+// Note: Make sure to update the address of the challenge package and the hero object
 const FLASHLENDER_ADDRESS = '' 
 
 const GAS_BUDGET = 1000000;
@@ -13,10 +13,14 @@ const packagePath = './solutions/flash_loan/flash_loan_solution';
 async function main () {
 
   dotenv.config();
+  if (process.env.RECOVERY_PHRASE == undefined) {
+    console.error('RECOVERY_PHRASE not set');
+    exit(1);
+  }
 
   // connect to local RPC server
   const provider = new JsonRpcProvider();
-  const keyPair = Ed25519Keypair.deriveKeypair(process.env.RECOVERY_PHRASE || 'hell0')
+  const keyPair = Ed25519Keypair.deriveKeypair(process.env.RECOVERY_PHRASE)
   const signer = new RawSigner(keyPair, provider);
 
   // Fund the account if needed

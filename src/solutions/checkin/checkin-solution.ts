@@ -2,8 +2,9 @@
 import { CertifiedTransaction, Ed25519Keypair, JsonRpcProvider, RawSigner, SuiCertifiedTransactionEffects } from '@mysten/sui.js';
 // Env
 import dotenv from "dotenv";
+import { exit } from 'process';
 
-// Make sure to replace this with the address of the module
+// Note: Make sure to update the address of the challenge package and the hero object
 const MODULE_ADDRESS = ''
 
 const GAS_BUDGET = 1000000;
@@ -13,11 +14,15 @@ async function main () {
 
   // Get dev account mnemonic phrase from env
   dotenv.config();
+  if (process.env.RECOVERY_PHRASE == undefined) {
+    console.error('RECOVERY_PHRASE not set');
+    exit(1);
+  }
 
   // connect to local RPC server
   const provider = new JsonRpcProvider();
   // Create a signer from the private key
-  const keyPair = Ed25519Keypair.deriveKeypair(process.env.RECOVERY_PHRASE || 'hell0')
+  const keyPair = Ed25519Keypair.deriveKeypair(process.env.RECOVERY_PHRASE)
   const signer = new RawSigner(keyPair, provider);
 
   // Fund the account if needed

@@ -7,7 +7,9 @@
   "author": "dantheman8300",
   "license": "MIT",
   "dependencies": {
+    "@mysten/sui.js": "^0.18.0",
     "@types/node": "^18.11.10",
+    "dotenv": "^16.0.3",
     "typescript": "^4.9.3"
   },
   "devDependencies": {

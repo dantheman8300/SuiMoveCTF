@@ -1,0 +1,10 @@
+[package]
+name = "movectf"
+version = "0.0.1"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework", rev = "devnet" }
+
+[addresses]
+movectf =  "0x5b102381e659b0a22f8957cabbdd071a6ec27878"
+sui =  "0000000000000000000000000000000000000002"

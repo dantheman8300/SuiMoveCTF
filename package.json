@@ -14,5 +14,11 @@
   },
   "devDependencies": {
     "ts-node": "^10.9.1"
+  },
+  "scripts": {
+    "challenge1": "ts-node src/solutions/checkin/checkin-solution.ts",
+    "challenge2": "ts-node src/solutions/flash_loan/flash-loan-solution.ts",
+    "challenge3": "ts-node src/solutions/move_lock/move-lock-solution.ts",
+    "challenge4": "ts-node src/solutions/simple_game/simple-game-solution.ts"
   }
 }

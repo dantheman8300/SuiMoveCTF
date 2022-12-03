@@ -6,6 +6,9 @@ import dotenv from "dotenv";
 // Make sure to replace this with the address of the module
 const MODULE_ADDRESS = ''
 
+const GAS_BUDGET = 1000000;
+
+
 async function main () {
 
   // Get dev account mnemonic phrase from env
@@ -36,7 +39,7 @@ async function main () {
     function: 'get_flag',
     typeArguments: [],
     arguments: [],
-    gasBudget: 10000,
+    gasBudget: GAS_BUDGET,
   }) as {
     EffectsCert: {
         certificate: CertifiedTransaction;

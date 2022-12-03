@@ -1,0 +1,11 @@
+[package]
+name = "hero_solution"
+version = "0.0.1"
+
+[dependencies]
+Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-framework", rev = "devnet" }
+ctf = {local = "../challenge_source_code/simple_game/"}
+
+[addresses]
+hero_solution =  "0x0"
+sui =  "0000000000000000000000000000000000000002"

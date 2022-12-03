@@ -1,9 +1,10 @@
 // Sui library for interacting with the Sui blockchain
-import { Ed25519Keypair, JsonRpcProvider, RawSigner } from '@mysten/sui.js';
+import { CertifiedTransaction, Ed25519Keypair, JsonRpcProvider, RawSigner, SuiCertifiedTransactionEffects } from '@mysten/sui.js';
 // Env
 import dotenv from "dotenv";
 
-const MODULE_ADDRESS = '0x63c60c8369a296d1ff1d2e7f347334f67019f306'
+// Make sure to replace this with the address of the module
+const MODULE_ADDRESS = ''
 
 async function main () {
 
@@ -29,17 +30,22 @@ async function main () {
   console.log(`Signer address: ${await signer.getAddress()}`)
 
   // Called the get_flag method on the module
-  const moveCallTxn = await signer.executeMoveCallWithRequestType({
+  const checkinTxn = await signer.executeMoveCall({
     packageObjectId: MODULE_ADDRESS,
     module: 'checkin',
     function: 'get_flag',
     typeArguments: [],
     arguments: [],
     gasBudget: 10000,
-  });
+  }) as {
+    EffectsCert: {
+        certificate: CertifiedTransaction;
+        effects: SuiCertifiedTransactionEffects;
+    }
+  };
 
   // Print the result of the function call
-  console.log('moveCallTxn', JSON.stringify(moveCallTxn, null, 2));
+  console.log('Checkin txn digest:', checkinTxn.EffectsCert.certificate.transactionDigest);
   
   return;
 }
